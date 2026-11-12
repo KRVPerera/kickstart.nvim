@@ -110,7 +110,7 @@ do
   vim.o.number = true
   -- You can also add relative line numbers, to help with jumping.
   --  Experiment for yourself to see if you like it!
-  vim.o.relativenumber = true
+  -- vim.o.relativenumber = true
 
   -- Enable mouse mode, can be useful for resizing splits for example!
   vim.o.mouse = 'a'
@@ -157,10 +157,6 @@ do
   --   and `:help lua-guide-options`
   vim.o.list = true
   vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
-  vim.opt.tabstop = 4
-  vim.opt.softtabstop = 4
-  vim.opt.shiftwidth = 4
-  vim.opt.expandtab = true
 
   -- Preview substitutions live, as you type!
   vim.o.inccommand = 'split'
@@ -169,14 +165,12 @@ do
   vim.o.cursorline = true
 
   -- Minimal number of screen lines to keep above and below the cursor.
-  vim.o.scrolloff = 5
+  vim.o.scrolloff = 10
 
   -- if performing an operation that would fail due to unsaved changes in the buffer (like `:q`),
   -- instead raise a dialog asking if you wish to save the current file(s)
   -- See `:help 'confirm'`
   vim.o.confirm = true
-
-  vim.o.sessionoptions = 'blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions'
 end
 
 -- ============================================================
@@ -226,10 +220,10 @@ do
   vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
   -- TIP: Disable arrow keys in normal mode
-  vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
-  vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
-  vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
-  vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
+  -- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
+  -- vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
+  -- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
+  -- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
 
   -- Keybinds to make split navigation easier.
   --  Use CTRL+<hjkl> to switch between windows
@@ -245,10 +239,6 @@ do
   -- vim.keymap.set("n", "<C-S-l>", "<C-w>L", { desc = "Move window to the right" })
   -- vim.keymap.set("n", "<C-S-j>", "<C-w>J", { desc = "Move window to the lower" })
   -- vim.keymap.set("n", "<C-S-k>", "<C-w>K", { desc = "Move window to the upper" })
-
-  -- Quickfix list navigation
-  vim.keymap.set('n', '<a-j>', '<cmd>cnext<CR>', { desc = 'Next quick fix' })
-  vim.keymap.set('n', '<a-k>', '<cmd>cprev<CR>', { desc = 'Previous quick fix' })
 
   -- [[ Basic Autocommands ]]
   --  See `:help lua-guide-autocommands`
@@ -317,16 +307,6 @@ do
 
       if name == 'LuaSnip' then
         if vim.fn.has 'win32' ~= 1 and vim.fn.executable 'make' == 1 then run_build(name, { 'make', 'install_jsregexp' }, ev.data.path) end
-        return
-      end
-
-      if name == 'markdown-preview.nvim' then
-        if vim.fn.executable 'npx' == 1 then
-          run_build(name, { 'npx', '--yes', 'yarn', 'install' }, vim.fs.joinpath(ev.data.path, 'app'))
-        else
-          vim.cmd.packadd 'markdown-preview.nvim'
-          vim.fn['mkdp#util#install']()
-        end
         return
       end
 
@@ -544,63 +524,37 @@ do
     gh 'nvim-lua/plenary.nvim',
     gh 'nvim-telescope/telescope.nvim',
     gh 'nvim-telescope/telescope-ui-select.nvim',
-    { src = gh 'nvim-telescope/telescope-live-grep-args.nvim', version = vim.version.range '1.*' },
   }
   if vim.fn.executable 'make' == 1 then table.insert(telescope_plugins, gh 'nvim-telescope/telescope-fzf-native.nvim') end
 
   -- NOTE: You can install multiple plugins at once
   vim.pack.add(telescope_plugins)
 
-  local lga_actions = require 'telescope-live-grep-args.actions'
   -- See `:help telescope` and `:help telescope.setup()`
   require('telescope').setup {
     -- You can put your default mappings / updates / etc. in here
     --  All the info you're looking for is in `:help telescope.setup()`
     --
-    defaults = {
-      mappings = {
-        i = {
-          ['<c-space>'] = 'to_fuzzy_refine',
-          ['<C-Down>'] = require('telescope.actions').cycle_history_next,
-          ['<C-Up>'] = require('telescope.actions').cycle_history_prev,
-        },
-      },
-    },
+    -- defaults = {
+    --   mappings = {
+    --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
+    --   },
+    -- },
     -- pickers = {}
     extensions = {
       ['ui-select'] = { require('telescope.themes').get_dropdown() },
-      live_grep_args = {
-        auto_quoting = true, -- enable/disable auto-quoting
-        mappings = { -- extend mappings
-          i = {
-            ['<C-k>'] = lga_actions.quote_prompt(),
-            ['<C-i>'] = lga_actions.quote_prompt { postfix = ' --iglob ' },
-            -- freeze the current list and start a fuzzy search in the frozen list
-            ['<C-space>'] = lga_actions.to_fuzzy_refine,
-          },
-        },
-        theme = 'dropdown', -- use dropdown theme
-        layout_config = { mirror = true, preview_cutoff = 20 }, -- mirror preview pane
-      },
     },
   }
 
   -- Enable Telescope extensions if they are installed
   pcall(require('telescope').load_extension, 'fzf')
   pcall(require('telescope').load_extension, 'ui-select')
-  pcall(require('telescope').load_extension, 'live_grep_args')
 
   -- See `:help telescope.builtin`
   local builtin = require 'telescope.builtin'
-  local live_grep_args_shortcuts = require 'telescope-live-grep-args.shortcuts'
-  vim.keymap.set('n', '<leader>fg', function() require('telescope').extensions.live_grep_args.live_grep_args() end, { desc = '[G]rep' })
-  vim.keymap.set('n', '<leader>gw', live_grep_args_shortcuts.grep_word_under_cursor, { desc = '[G]rep [W]ord' })
-  vim.keymap.set('n', '<leader>gb', live_grep_args_shortcuts.grep_word_under_cursor_current_buffer, { desc = '[G]rep [B]uffer' })
-  vim.keymap.set('v', '<leader>gv', live_grep_args_shortcuts.grep_visual_selection, { desc = '[G]rep [V]isual' })
   vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
   vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
   vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
-  vim.keymap.set('n', '<leader>sF', function() builtin.find_files { no_ignore = true, hidden = true } end, { desc = '[S]earch all [F]iles (incl ignored/hidden)' })
   vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
   vim.keymap.set({ 'n', 'v' }, '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
   vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
@@ -779,39 +733,16 @@ do
   --  See `:help lsp-config` for information about keys and how to configure
   ---@type table<string, vim.lsp.Config>
   local servers = {
-    clangd = {},
+    -- clangd = {},
     -- gopls = {},
     -- pyright = {},
-    rust_analyzer = {},
-    cmake = {},
-    markdown_oxide = {},
-    yamlls = {},
-    cssls = {},
-    ts_ls = {},
-    html = {},
-
-    pylsp = {
-      settings = {
-        pylsp = {
-          plugins = {
-            pycodestyle = {
-              ignore = { 'E266', 'E501' },
-              maxLineLength = 180,
-            },
-            autopep8 = {},
-            flake8 = {
-              maxLineLength = 180,
-            },
-            mccabe = {
-              maxLineLength = 180,
-            },
-            pylint = {
-              maxLineLength = 180,
-            },
-          },
-        },
-      },
-    },
+    -- tsc = {},
+    --
+    -- Some languages (like rust) have entire language plugins that can be useful:
+    --    https://github.com/mrcjkb/rustaceanvim
+    --
+    -- But for many setups, the LSP (`rust_analyzer`) will work just fine
+    -- rust_analyzer = {},
 
     stylua = {}, -- Used to format Lua code
 
@@ -843,12 +774,6 @@ do
       settings = {
         Lua = {
           format = { enable = false }, -- Disable formatting (formatting is done by stylua)
-          completion = {
-            callSnippet = 'Replace',
-          },
-          diagnostics = {
-            globals = { 'vim' },
-          },
         },
       },
     },
@@ -876,15 +801,10 @@ do
   --    :Mason
   --
   -- You can press `g?` for help in this menu.
-  local ensure_installed = {
-    'clangd',
-    'cmake-language-server',
-    'lua-language-server',
-    'markdown-oxide',
-    'rust-analyzer',
-    'stylua',
+  local ensure_installed = vim.tbl_keys(servers or {})
+  vim.list_extend(ensure_installed, {
     -- You can add other tools here that you want Mason to install
-  }
+  })
 
   require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -904,14 +824,15 @@ do
   require('conform').setup {
     notify_on_error = false,
     format_on_save = function(bufnr)
-      -- Disable "format_on_save lsp_fallback" for languages that don't
-      -- have a well standardized coding style. You can add additional
-      -- languages here or re-enable it for the disabled ones.
-      local disable_filetypes = { c = true, cpp = true, cmake = true }
-      if disable_filetypes[vim.bo[bufnr].filetype] then
-        return nil
-      else
+      -- You can specify filetypes to autoformat on save here:
+      local enabled_filetypes = {
+        -- lua = true,
+        -- python = true,
+      }
+      if enabled_filetypes[vim.bo[bufnr].filetype] then
         return { timeout_ms = 500 }
+      else
+        return nil
       end
     end,
     default_format_opts = {
@@ -1112,86 +1033,6 @@ do
   -- require 'custom.plugins.colorscheme'
   -- require 'custom.plugins.ui'
   -- require 'custom.plugins.git'
-end
-
--- ============================================================
--- SECTION 11: PERSONAL PLUGINS
--- Extra plugins on top of kickstart. Keymaps for several of these live in after/plugin/
--- ============================================================
-do
-  -- Local harpoon checkout, loaded straight from disk so edits apply without reinstalling
-  vim.opt.runtimepath:prepend '/home/krv/projects/harpoon'
-
-  vim.pack.add { gh 'MeanderingProgrammer/markdown.nvim' }
-  require('render-markdown').setup {}
-
-  -- Markdown preview in the browser, built by the PackChanged hook in section 3
-  vim.pack.add { gh 'iamcco/markdown-preview.nvim' }
-  vim.g.mkdp_filetypes = { 'markdown' }
-
-  vim.pack.add { gh 'folke/twilight.nvim', gh 'folke/zen-mode.nvim' }
-  require('twilight').setup {}
-  require('zen-mode').setup {}
-
-  vim.pack.add {
-    gh 'ThePrimeagen/vim-be-good',
-    gh 'mbbill/undotree',
-    gh 'voldikss/vim-floaterm',
-    gh 'vuciv/golf',
-    gh 'mfukar/robotframework-vim',
-  }
-
-  vim.pack.add { gh 'nvim-lualine/lualine.nvim' }
-  require('lualine').setup {
-    options = { theme = 'everforest' },
-  }
-
-  vim.pack.add { gh 'sindrets/diffview.nvim', gh 'NeogitOrg/neogit' }
-
-  -- VimTeX reads its options when it loads, so set them before adding it
-  vim.g.vimtex_view_method = 'zathura'
-  vim.pack.add { gh 'lervag/vimtex' }
-
-  vim.pack.add { { src = gh 'polarmutex/git-worktree.nvim', version = vim.version.range '2.*' } }
-  vim.keymap.set('n', '<leader>sr', function() require('telescope').extensions.git_worktree.git_worktree() end, { desc = '[S]witch workt[r]ee ' })
-  vim.keymap.set('n', '<leader>sR', function() require('telescope').extensions.git_worktree.create_git_worktree() end, { desc = '[S]witch workt[R]ee ' })
-
-  vim.pack.add { gh 'MunifTanjim/nui.nvim', gh 'rcarriga/nvim-notify', gh 'folke/noice.nvim' }
-  require('noice').setup {}
-
-  vim.pack.add { gh 'rmagatti/auto-session' }
-  require('auto-session').setup {
-    suppressed_dirs = { '~/', '~/Projects', '~/Downloads', '/' },
-    session_lens = {
-      load_on_setup = true,
-      previewer = false,
-      mappings = {
-        -- Mode can be a string or a table, e.g. {"i", "n"} for both insert and normal mode
-        delete_session = { 'i', '<C-D>' },
-        alternate_session = { 'i', '<C-S>' },
-        copy_session = { 'i', '<C-Y>' },
-      },
-      theme_conf = {
-        border = true,
-      },
-    },
-    pre_restore_cmds = {
-      -- might not be necessary, but save current harpoon data when we're about to restore a session
-      function() require('harpoon'):sync() end,
-    },
-    post_restore_cmds = {
-      function()
-        local harpoon = require 'harpoon'
-
-        -- this is the only way i found to force harpoon to reread data from the disk rather
-        -- than using what's in memory
-        harpoon.data = require('harpoon.Data').Data:new(harpoon.config)
-      end,
-    },
-  }
-  vim.keymap.set('n', '<leader>wr', '<cmd>SessionSearch<CR>', { desc = 'Session search' })
-  vim.keymap.set('n', '<leader>ws', '<cmd>SessionSave<CR>', { desc = 'Save session' })
-  vim.keymap.set('n', '<leader>wa', '<cmd>SessionToggleAutoSave<CR>', { desc = 'Toggle autosave' })
 end
 
 -- The line beneath this is called `modeline`. See `:help modeline`
