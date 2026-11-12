@@ -447,6 +447,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
       vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
+      vim.keymap.set('n', '<leader>sF', function() builtin.find_files { no_ignore = true, hidden = true } end, { desc = '[S]earch all [F]iles (incl ignored/hidden)' })
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set({ 'n', 'v' }, '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
       vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
@@ -660,6 +661,10 @@ require('lazy').setup({
         rust_analyzer = {},
         cmake = {},
         markdown_oxide = {},
+        yamlls = {},
+        cssls = {},
+        ts_ls = {},
+        html = {},
 
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
@@ -988,7 +993,7 @@ require('lazy').setup({
   --    This is the easiest way to modularize your config.
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
   --
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use telescope!
@@ -1065,6 +1070,7 @@ require('lazy').setup({
   { 'vuciv/golf' },
   --  { 'dense-analysis/ale' },
   -- { 'xuhdev/vim-latex-live-preview' },
+  { 'mfukar/robotframework-vim' },
   {
     'lervag/vimtex',
     lazy = false, -- we don't want to lazy load VimTeX
